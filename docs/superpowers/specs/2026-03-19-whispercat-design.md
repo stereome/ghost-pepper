@@ -127,7 +127,7 @@ Control Key Up
 
 ### MenuBarView
 - SwiftUI-based menu bar extra
-- Idle state: cat icon (SF Symbol `cat.fill` or custom asset)
+- Idle state: waveform icon (SF Symbol `waveform`)
 - Recording state: red-tinted icon
 - Dropdown menu items:
   - Status line ("Ready" / "Recording..." / "Transcribing...")
