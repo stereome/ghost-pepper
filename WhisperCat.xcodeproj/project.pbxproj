@@ -15,6 +15,8 @@
 		BFC328A5EC5C27190383C083 /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAE30E5218AB682D709B805F /* ModelManager.swift */; };
 		D1CC1FC4E9069619C2D1A99E /* WhisperCatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6448B6A94297E00FBE83DFF /* WhisperCatTests.swift */; };
 		D8B2BE4ACA5F0EE1E39B8AC1 /* WhisperTranscriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 357D04C5473A25ACAB0EE2AC /* WhisperTranscriber.swift */; };
+		AA3333333333333333333333 /* AudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1111111111111111111111 /* AudioRecorder.swift */; };
+		AA4444444444444444444444 /* AudioRecorderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2222222222222222222222 /* AudioRecorderTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,6 +41,8 @@
 		BEC10A44DB0BCB1EC41C0AD5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		C6448B6A94297E00FBE83DFF /* WhisperCatTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhisperCatTests.swift; sourceTree = "<group>"; };
 		FAE30E5218AB682D709B805F /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelManager.swift; sourceTree = "<group>"; };
+		AA1111111111111111111111 /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
+		AA2222222222222222222222 /* AudioRecorderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorderTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +64,14 @@
 				C610F50E8E2EABFA523A7D2D /* WhisperCatTests */,
 				666BB0E93726D928E709BD0E /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		AA5555555555555555555555 /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				AA1111111111111111111111 /* AudioRecorder.swift */,
+			);
+			path = Audio;
 			sourceTree = "<group>";
 		};
 		5EDB93F357F2F16253C13B6D /* Transcription */ = {
@@ -87,6 +99,7 @@
 				BEC10A44DB0BCB1EC41C0AD5 /* Info.plist */,
 				61E364B70F7CF60FF05A54F3 /* WhisperCat.entitlements */,
 				91D06020DF82CB364C76216C /* WhisperCatApp.swift */,
+				AA5555555555555555555555 /* Audio */,
 				5EDB93F357F2F16253C13B6D /* Transcription */,
 				D322064D82007C428172CBD5 /* UI */,
 			);
@@ -96,6 +109,7 @@
 		C610F50E8E2EABFA523A7D2D /* WhisperCatTests */ = {
 			isa = PBXGroup;
 			children = (
+				AA2222222222222222222222 /* AudioRecorderTests.swift */,
 				C6448B6A94297E00FBE83DFF /* WhisperCatTests.swift */,
 				2982CD3A002B866B0EFF8F0E /* WhisperTranscriberTests.swift */,
 			);
@@ -187,6 +201,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA4444444444444444444444 /* AudioRecorderTests.swift in Sources */,
 				D1CC1FC4E9069619C2D1A99E /* WhisperCatTests.swift in Sources */,
 				159DC21395BBE127DCE45CBE /* WhisperTranscriberTests.swift in Sources */,
 			);
@@ -197,6 +212,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2836F391A17A7520A05DF5EE /* AppState.swift in Sources */,
+				AA3333333333333333333333 /* AudioRecorder.swift in Sources */,
 				8CBD27433A339C8523112A74 /* MenuBarView.swift in Sources */,
 				BFC328A5EC5C27190383C083 /* ModelManager.swift in Sources */,
 				58DF2F200630FFB7E2F2C6D9 /* WhisperCatApp.swift in Sources */,
