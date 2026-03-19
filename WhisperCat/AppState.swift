@@ -5,6 +5,7 @@ enum AppStatus: String {
     case loading = "Loading model..."
     case recording = "Recording..."
     case transcribing = "Transcribing..."
+    case cleaningUp = "Cleaning up..."
     case error = "Error"
 }
 
@@ -14,6 +15,7 @@ class AppState: ObservableObject {
     @Published var isRecording: Bool = false
     @Published var errorMessage: String?
     @AppStorage("cleanupEnabled") var cleanupEnabled: Bool = true
+    @AppStorage("cleanupPrompt") var cleanupPrompt: String = TextCleaner.defaultPrompt
 
     let modelManager = ModelManager()
     let audioRecorder = AudioRecorder()
@@ -35,7 +37,6 @@ class AppState: ObservableObject {
     }
 
     func initialize() async {
-        // Check microphone permission
         let hasMic = await PermissionChecker.checkMicrophone()
         if !hasMic {
             errorMessage = "Microphone access required"
@@ -43,7 +44,6 @@ class AppState: ObservableObject {
             return
         }
 
-        // Load WhisperKit model first (downloads on first run)
         status = .loading
         await modelManager.loadModel()
 
@@ -53,10 +53,8 @@ class AppState: ObservableObject {
             return
         }
 
-        // Now try to start the hotkey monitor (needs Accessibility)
         await startHotkeyMonitor()
 
-        // Load cleanup model in background (don't block Ready state)
         if cleanupEnabled {
             Task {
                 await textCleanupManager.loadModel()
@@ -64,7 +62,6 @@ class AppState: ObservableObject {
         }
     }
 
-    /// Attempts to start the hotkey monitor. Can be called again after granting Accessibility permission.
     func startHotkeyMonitor() async {
         hotkeyMonitor.onRecordingStart = { [weak self] in
             Task { @MainActor in
@@ -88,12 +85,21 @@ class AppState: ObservableObject {
     }
 
     private func startRecording() {
-        guard status == .ready else { return }
+        // If whisper model isn't ready, show loading message
+        guard status == .ready else {
+            if status == .loading {
+                overlay.show(message: .modelLoading)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+                    self?.overlay.dismiss()
+                }
+            }
+            return
+        }
 
         do {
             try audioRecorder.startRecording()
             soundEffects.playStart()
-            overlay.show()
+            overlay.show(message: .recording)
             isRecording = true
             status = .recording
         } catch {
@@ -107,18 +113,23 @@ class AppState: ObservableObject {
 
         let buffer = audioRecorder.stopRecording()
         soundEffects.playStop()
-        overlay.dismiss()
         isRecording = false
         status = .transcribing
+        overlay.show(message: .transcribing)
 
         if let text = await transcriber.transcribe(audioBuffer: buffer) {
             let finalText: String
             if cleanupEnabled && textCleanupManager.isReady {
-                finalText = await textCleaner.clean(text: text)
+                status = .cleaningUp
+                overlay.show(message: .cleaningUp)
+                finalText = await textCleaner.clean(text: text, prompt: cleanupPrompt)
             } else {
                 finalText = text
             }
+            overlay.dismiss()
             textPaster.paste(text: finalText)
+        } else {
+            overlay.dismiss()
         }
 
         status = .ready

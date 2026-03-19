@@ -50,7 +50,7 @@ final class TextCleanupManager: ObservableObject {
         }
 
         // Load the model with ChatML template and system prompt
-        let template = Template.chatML(TextCleaner.systemPrompt)
+        let template = Template.chatML(TextCleaner.defaultPrompt)
         guard let model = LLM(from: modelPath, template: template, maxTokenCount: 1024) else {
             self.errorMessage = "Failed to load cleanup model"
             self.state = .error
@@ -58,8 +58,8 @@ final class TextCleanupManager: ObservableObject {
         }
 
         model.temp = 0.1
-        model.update = { _ in } // Silence default printing
-        model.postprocess = { _ in }
+        model.update = { (_: String?) in }
+        model.postprocess = { (_: String) in }
 
         self.llm = model
         self.state = .ready

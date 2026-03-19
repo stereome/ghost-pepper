@@ -14,9 +14,31 @@ struct WhisperCatApp: App {
                     await appState.initialize()
                 }
         } label: {
-            Image(systemName: appState.isRecording ? "waveform.circle.fill" : "waveform")
+            Image(systemName: menuBarIconName)
                 .symbolRenderingMode(.palette)
-                .foregroundStyle(appState.isRecording ? .red : .primary)
+                .foregroundStyle(menuBarIconColor)
+        }
+    }
+
+    private var menuBarIconName: String {
+        switch appState.status {
+        case .loading:
+            return "arrow.down.circle"
+        case .recording:
+            return "waveform.circle.fill"
+        case .error:
+            return "exclamationmark.triangle"
+        default:
+            return "waveform"
+        }
+    }
+
+    private var menuBarIconColor: Color {
+        switch appState.status {
+        case .loading: return .orange
+        case .recording: return .red
+        case .error: return .yellow
+        default: return .primary
         }
     }
 }

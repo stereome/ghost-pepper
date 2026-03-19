@@ -5,6 +5,8 @@ struct MenuBarView: View {
     @ObservedObject var appState: AppState
     @State private var inputDevices: [AudioInputDevice] = []
     @State private var selectedDeviceID: AudioDeviceID = 0
+    @State private var showingPromptEditor = false
+    private let promptEditor = PromptEditorController()
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -70,12 +72,16 @@ struct MenuBarView: View {
                     Text(appState.textCleanupManager.errorMessage ?? "Cleanup model error")
                         .font(.caption)
                         .foregroundStyle(.red)
-                case .ready:
-                    Text("Cleanup ready")
-                        .font(.caption)
-                        .foregroundStyle(.green)
-                case .idle:
+                case .ready, .idle:
                     EmptyView()
+                }
+
+                Button("Edit Cleanup Prompt...") {
+                    promptEditor.show(prompt: $appState.cleanupPrompt)
+                }
+
+                Button("Reset Prompt to Default") {
+                    appState.cleanupPrompt = TextCleaner.defaultPrompt
                 }
             }
 
