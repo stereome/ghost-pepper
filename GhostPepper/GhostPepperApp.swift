@@ -4,19 +4,36 @@ import SwiftUI
 struct GhostPepperApp: App {
     @StateObject private var appState = AppState()
     @State private var hasInitialized = false
+    @State private var pulseOn = true
+
+    private let pulseTimer = Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()
 
     var body: some Scene {
         MenuBarExtra {
             MenuBarView(appState: appState)
         } label: {
             Group {
-                if appState.status == .ready || appState.status == .transcribing || appState.status == .cleaningUp {
+                switch appState.status {
+                case .recording:
                     Image("MenuBarIcon")
                         .renderingMode(.template)
-                } else {
-                    Image(systemName: menuBarIconName)
+                        .foregroundStyle(pulseOn ? .red : .red.opacity(0.3))
+                        .onReceive(pulseTimer) { _ in
+                            if appState.status == .recording {
+                                pulseOn.toggle()
+                            }
+                        }
+                case .loading:
+                    Image(systemName: "ellipsis.circle")
                         .symbolRenderingMode(.palette)
-                        .foregroundStyle(menuBarIconColor)
+                        .foregroundStyle(.orange)
+                case .error:
+                    Image(systemName: "exclamationmark.triangle")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(.yellow)
+                default:
+                    Image("MenuBarIcon")
+                        .renderingMode(.template)
                 }
             }
             .onAppear {
@@ -26,28 +43,6 @@ struct GhostPepperApp: App {
                     await appState.initialize()
                 }
             }
-        }
-    }
-
-    private var menuBarIconName: String {
-        switch appState.status {
-        case .loading:
-            return "ellipsis.circle"
-        case .recording:
-            return "waveform.circle.fill"
-        case .error:
-            return "exclamationmark.triangle"
-        default:
-            return "waveform"
-        }
-    }
-
-    private var menuBarIconColor: Color {
-        switch appState.status {
-        case .loading: return .orange
-        case .recording: return .red
-        case .error: return .yellow
-        default: return .primary
         }
     }
 }
