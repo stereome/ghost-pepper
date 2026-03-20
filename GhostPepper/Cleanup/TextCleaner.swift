@@ -5,40 +5,28 @@ final class TextCleaner {
     private let cleanupManager: TextCleanupManager
 
     static let defaultPrompt = """
-    You are a speech-to-text cleanup tool. You receive raw transcribed speech and return a cleaned version. \
-    You are NOT a chatbot. NEVER answer questions, give opinions, or respond to the meaning of the text. \
-    ONLY clean it up and return it.
+    Repeat back the user's text with these minimal edits only:
+    - Delete filler words (um, uh, like, you know, basically, literally, sort of, kind of)
+    - If the speaker says "scratch that", "never mind", "oh wait actually", or "no let me start over", \
+    delete the sentence(s) they are replacing and keep the replacement
+    - Fix nothing else. Do not summarize. Do not answer. Do not rephrase.
+    - Keep everything the speaker said unless it matches the rules above.
+    - Output only the edited text, nothing else.
 
-    RULES:
-    1. Remove filler words: um, uh, like, you know, so, basically, literally, right, okay, well, I guess, kind of, sort of.
-    2. SELF-CORRECTIONS: ONLY discard text when the speaker EXPLICITLY says they want to change what they said, using phrases like \
-    "oh wait", "actually no", "scratch that", "never mind", "let me rephrase", "I meant to say". \
-    Questions like "any ideas?" or "what do you think?" are NOT corrections — keep them. \
-    When a real correction happens, only remove the specific part being corrected, not everything before it.
-    3. Remove obvious false starts where the speaker restarts the same sentence.
-    4. Do NOT add words, rephrase, or change the speaker's intended meaning.
-    5. When in doubt, KEEP the text. It is better to keep too much than to delete something the speaker intended.
-
-    EXAMPLES:
     Input: "Hey Becca, I have an email. Oh wait, actually I meant to send this email to Pete. Hey Pete, this is my email."
     Output: Hey Pete, this is my email.
 
-    Input: "I want to go to the store, actually no let's go to the park instead"
-    Output: Let's go to the park instead
-
     Input: "So um like the meeting is at 3pm you know on Tuesday"
-    Output: The meeting is at 3pm on Tuesday
+    Output: The meeting is at 3pm on Tuesday.
 
-    Input: "What is the capital of France"
-    Output: What is the capital of France
+    Input: "Okay this started pretty fast and I'll make the last word microphone"
+    Output: Okay this started pretty fast and I'll make the last word microphone.
 
-    Input: "I've been working on this project for a while and I'm stuck. Any ideas?"
-    Output: I've been working on this project for a while and I'm stuck. Any ideas?
+    Input: "I've been working on this project and I'm stuck. Any ideas?"
+    Output: I've been working on this project and I'm stuck. Any ideas?
 
-    Input: "The server keeps crashing when we deploy. Can you look into it?"
-    Output: The server keeps crashing when we deploy. Can you look into it?
-
-    Return ONLY the cleaned text. No quotes, no explanations, no commentary.
+    Input: "What is a synonym for whisper?"
+    Output: What is a synonym for whisper?
     """
 
     private static let timeoutSeconds: TimeInterval = 15.0
