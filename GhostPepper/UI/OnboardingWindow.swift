@@ -2,6 +2,7 @@
 import SwiftUI
 import AppKit
 import AVFoundation
+import CoreAudio
 
 // MARK: - Window Controller
 
@@ -132,6 +133,8 @@ struct SetupStep: View {
     @State private var accessibilityGranted = false
     @State private var accessibilityTimer: Timer?
     @State private var modelLoadStarted = false
+    @State private var inputDevices: [AudioInputDevice] = []
+    @State private var selectedDeviceID: AudioDeviceID = 0
 
     private var allComplete: Bool {
         micGranted && accessibilityGranted && modelManager.isReady
@@ -166,7 +169,10 @@ struct SetupStep: View {
                             Task {
                                 let granted = await PermissionChecker.checkMicrophone()
                                 micGranted = granted
-                                if !granted {
+                                if granted {
+                                    inputDevices = AudioDeviceManager.listInputDevices()
+                                    selectedDeviceID = AudioDeviceManager.defaultInputDeviceID() ?? 0
+                                } else {
                                     micDenied = true
                                 }
                             }
@@ -175,6 +181,18 @@ struct SetupStep: View {
                         .tint(.orange)
                         .controlSize(.small)
                     }
+                }
+
+                if micGranted && inputDevices.count > 1 {
+                    Picker("Input Device", selection: $selectedDeviceID) {
+                        ForEach(inputDevices) { device in
+                            Text(device.name).tag(device.id)
+                        }
+                    }
+                    .onChange(of: selectedDeviceID) { _, newValue in
+                        AudioDeviceManager.setDefaultInputDevice(newValue)
+                    }
+                    .padding(.horizontal, 4)
                 }
 
                 SetupRow(
@@ -245,6 +263,11 @@ struct SetupStep: View {
             micGranted = AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
             micDenied = AVCaptureDevice.authorizationStatus(for: .audio) == .denied
             accessibilityGranted = PermissionChecker.checkAccessibility()
+
+            if micGranted {
+                inputDevices = AudioDeviceManager.listInputDevices()
+                selectedDeviceID = AudioDeviceManager.defaultInputDeviceID() ?? 0
+            }
 
             if !modelLoadStarted && !modelManager.isReady {
                 modelLoadStarted = true
@@ -548,26 +571,39 @@ struct DoneStep: View {
                 .font(.callout)
                 .foregroundStyle(.secondary)
 
-            HStack(spacing: 12) {
+            // Menu bar mockup
+            HStack(spacing: 10) {
                 Spacer()
-                Text("Wi-Fi")
-                    .font(.caption)
+                Image(systemName: "moon.fill")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                Image(systemName: "display")
+                    .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                 Image("MenuBarIcon")
                     .renderingMode(.template)
-                    .foregroundStyle(.primary)
-                Text("3:42 PM")
-                    .font(.caption)
+                    .foregroundStyle(.orange)
+                Image(systemName: "wifi")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                Image(systemName: "battery.75percent")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+                Image(systemName: "magnifyingglass")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                Text(Date(), format: .dateTime.weekday(.abbreviated).month(.abbreviated).day().hour().minute())
+                    .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                 Spacer()
             }
             .padding(.vertical, 8)
-            .padding(.horizontal, 16)
+            .padding(.horizontal, 12)
             .background(
                 RoundedRectangle(cornerRadius: 8)
                     .fill(Color(nsColor: .controlBackgroundColor))
             )
-            .padding(.horizontal, 60)
+            .padding(.horizontal, 40)
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("From the menu bar you can:")
