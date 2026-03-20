@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 enum AppStatus: String {
     case ready = "Ready"
@@ -31,9 +32,18 @@ class AppState: ObservableObject {
         status == .ready
     }
 
+    private var cleanupStateObserver: Any?
+
     init() {
         self.transcriber = WhisperTranscriber(modelManager: modelManager)
         self.textCleaner = TextCleaner(cleanupManager: textCleanupManager)
+
+        // Forward cleanup manager state changes to trigger menu bar icon refresh
+        cleanupStateObserver = textCleanupManager.objectWillChange.sink { [weak self] _ in
+            Task { @MainActor in
+                self?.objectWillChange.send()
+            }
+        }
     }
 
     func initialize() async {
@@ -58,6 +68,8 @@ class AppState: ObservableObject {
         if cleanupEnabled {
             Task {
                 await textCleanupManager.loadModel()
+                // Force menu bar icon refresh
+                objectWillChange.send()
             }
         }
     }
