@@ -1,6 +1,14 @@
-# Ghost Pepper
+<p align="center">
+  <img src="app-icon.png" width="128" alt="Ghost Pepper icon">
+</p>
 
-A macOS menu bar app for system-wide hold-to-talk speech-to-text. Hold the Control key to record, release to transcribe and paste into any text field. Runs 100% locally — no cloud APIs, no data leaves your machine.
+<h1 align="center">Ghost Pepper 🌶️</h1>
+
+<p align="center">
+  A macOS menu bar app for system-wide hold-to-talk speech-to-text.<br>
+  Hold the Control key to record, release to transcribe and paste into any text field.<br>
+  Runs 100% locally — no cloud APIs, no data leaves your machine.
+</p>
 
 ## Download
 
