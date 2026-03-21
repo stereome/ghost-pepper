@@ -8,7 +8,7 @@
 
 ## Why "Ghost Pepper"?
 
-**Ghost** — your data never leaves your computer. No cloud, no accounts, no tracking. It's invisible to everyone but you.
+**Ghost** — your data never leaves your computer. All models run locally.
 
 **Pepper** — it's spicy to offer something for free that other apps have raised $80M to build.
 
