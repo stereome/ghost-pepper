@@ -366,10 +366,19 @@ struct SetupStep: View {
                 .padding(.horizontal, 40)
                 .padding(.bottom, 24)
             } else {
-                Text("Complete all items above to continue")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.bottom, 24)
+                Button(action: {
+                    let tweet = "hey @matthartman I'm trying out Ghost Pepper 🌶️ will let you know how I like it!"
+                    let encoded = tweet.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+                    if let url = URL(string: "https://twitter.com/intent/tweet?text=\(encoded)") {
+                        NSWorkspace.shared.open(url)
+                    }
+                }) {
+                    Text("📣 Tell Matt you're trying out Ghost Pepper!")
+                        .font(.callout)
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.blue)
+                .padding(.bottom, 24)
             }
         }
         .onAppear {
@@ -730,22 +739,6 @@ struct DoneStep: View {
                 BulletPoint("Check for updates")
             }
             .padding(.horizontal, 40)
-
-            Button(action: {
-                let tweet = "hey @matthartman I'm trying out Ghost Pepper 🌶️ will let you know how I like it!"
-                let encoded = tweet.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-                if let url = URL(string: "https://twitter.com/intent/tweet?text=\(encoded)") {
-                    NSWorkspace.shared.open(url)
-                }
-            }) {
-                HStack(spacing: 4) {
-                    Text("📣")
-                    Text("Tell Matt you're trying it out!")
-                        .font(.callout)
-                }
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(.blue)
 
             Spacer()
 
