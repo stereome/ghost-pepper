@@ -729,16 +729,14 @@ struct DoneStep: View {
 }
 
 struct EmojiSpinner: View {
-    @State private var index = 0
     private let emojis = ["🌶️", "👻", "🌶️", "👻", "🔥"]
-    private let timer = Timer.publish(every: 0.4, on: .main, in: .common).autoconnect()
 
     var body: some View {
-        Text(emojis[index])
-            .font(.system(size: 16))
-            .onReceive(timer) { _ in
-                index = (index + 1) % emojis.count
-            }
+        TimelineView(.periodic(every: 0.5)) { timeline in
+            let frame = Int(timeline.date.timeIntervalSinceReferenceDate * 2) % emojis.count
+            Text(emojis[frame])
+                .font(.system(size: 20))
+        }
     }
 }
 
