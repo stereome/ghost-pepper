@@ -63,28 +63,32 @@ class OnboardingWindowController {
     func show(appState: AppState, onComplete: @escaping () -> Void) {
         dismiss()
 
-        // Temporarily show in dock/Cmd+Tab during onboarding
+        // Show in dock/Cmd+Tab during onboarding
         NSApp.setActivationPolicy(.regular)
 
-        let onboardingView = OnboardingView(appState: appState, onComplete: { [weak self] in
-            self?.dismiss()
-            onComplete()
-        })
+        // Delay slightly to let activation policy take effect
+        DispatchQueue.main.async {
+            let onboardingView = OnboardingView(appState: appState, onComplete: { [weak self] in
+                self?.dismiss()
+                onComplete()
+            })
 
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 480, height: 520),
-            styleMask: [.titled],
-            backing: .buffered,
-            defer: false
-        )
-        window.title = "Ghost Pepper"
-        window.contentView = NSHostingView(rootView: onboardingView)
-        window.center()
-        window.isReleasedWhenClosed = false
-        window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 480, height: 520),
+                styleMask: [.titled, .closable],
+                backing: .buffered,
+                defer: false
+            )
+            window.title = "Ghost Pepper"
+            window.contentView = NSHostingView(rootView: onboardingView)
+            window.center()
+            window.level = .floating
+            window.isReleasedWhenClosed = false
+            window.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
 
-        self.window = window
+            self.window = window
+        }
     }
 
     func dismiss() {
