@@ -317,9 +317,7 @@ struct SetupStep: View {
                     isComplete: modelManager.isReady
                 ) {
                     if modelManager.state == .loading {
-                        ProgressView()
-                            .progressViewStyle(.linear)
-                            .frame(width: 60)
+                        EmojiSpinner()
                     } else if modelManager.state == .error {
                         Button("Retry") {
                             Task { await modelManager.loadModel() }
@@ -727,6 +725,20 @@ struct DoneStep: View {
             .padding(.horizontal, 40)
             .padding(.bottom, 24)
         }
+    }
+}
+
+struct EmojiSpinner: View {
+    @State private var index = 0
+    private let emojis = ["🌶️", "👻", "🌶️", "👻", "🔥"]
+    private let timer = Timer.publish(every: 0.4, on: .main, in: .common).autoconnect()
+
+    var body: some View {
+        Text(emojis[index])
+            .font(.system(size: 16))
+            .onReceive(timer) { _ in
+                index = (index + 1) % emojis.count
+            }
     }
 }
 
