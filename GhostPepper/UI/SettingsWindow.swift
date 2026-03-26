@@ -704,6 +704,7 @@ struct SettingsView: View {
 
     private func transcriptionLabDetail(for entry: TranscriptionLabEntry) -> some View {
         let canPlayRecording = transcriptionLabController.audioURL(for: entry).pathExtension.lowercased() == "wav"
+        let originalSpeechModelName = SpeechModelCatalog.model(named: entry.speechModelID)?.pickerLabel ?? entry.speechModelID
 
         return VStack(alignment: .leading, spacing: 24) {
             HStack(alignment: .center, spacing: 12) {
@@ -721,86 +722,78 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
 
-            SettingsCard("Audio recording") {
-                VStack(alignment: .leading, spacing: 16) {
-                    TranscriptionLabMetadataSummary(entry: entry)
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Audio recording")
+                    .font(.title3.weight(.semibold))
 
-                    HStack(spacing: 12) {
-                        Button {
-                            playTranscriptionLabAudio(for: entry)
-                        } label: {
-                            Label("Play recording", systemImage: "play.fill")
-                        }
-                        .buttonStyle(.bordered)
-                        .disabled(!canPlayRecording)
+                TranscriptionLabMetadataSummary(entry: entry)
 
-                        Text("Use this recording as the fixed input for transcription and cleanup experiments.")
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                    }
+                Button {
+                    playTranscriptionLabAudio(for: entry)
+                } label: {
+                    Label("Play recording", systemImage: "play.fill")
+                }
+                .buttonStyle(.bordered)
+                .disabled(!canPlayRecording)
 
-                    if !canPlayRecording {
-                        Text("Playback is available for newly archived recordings.")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
+                if !canPlayRecording {
+                    Text("Playback is available for newly archived recordings.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
             }
 
-            SettingsCard("Transcription") {
-                VStack(alignment: .leading, spacing: 18) {
-                    Text("Original raw transcription")
+            VStack(alignment: .leading, spacing: 16) {
+                Text("Transcription")
+                    .font(.title3.weight(.semibold))
+
+                Text("Originally transcribed with \(originalSpeechModelName)")
+                    .font(.subheadline.weight(.medium))
+
+                ReadOnlyTextPane(
+                    text: entry.rawTranscription ?? "No transcription was captured for this recording.",
+                    minimumHeight: 72,
+                    maximumHeight: 180,
+                    monospaced: false
+                )
+
+                HStack(alignment: .center, spacing: 12) {
+                    Text("Use transcription model")
                         .font(.subheadline.weight(.medium))
 
-                    ReadOnlyTextPane(
-                        text: entry.rawTranscription ?? "No transcription was captured for this recording.",
-                        minimumHeight: 72,
-                        maximumHeight: 180,
-                        monospaced: false
-                    )
-
-                    Text("New raw transcription")
-                        .font(.subheadline.weight(.medium))
-
-                    ReadOnlyTextPane(
-                        text: transcriptionLabController.displayedExperimentRawTranscription,
-                        minimumHeight: 72,
-                        maximumHeight: 180,
-                        monospaced: false
-                    )
-
-                    Divider()
-
-                    HStack(alignment: .bottom, spacing: 16) {
-                        SettingsField("New speech model") {
-                            Picker("Speech Model", selection: $transcriptionLabController.selectedSpeechModelID) {
-                                ForEach(ModelManager.availableModels) { model in
-                                    Text(model.pickerLabel).tag(model.name)
-                                }
-                            }
-                            .labelsHidden()
-                            .frame(maxWidth: 360, alignment: .leading)
+                    Picker("Speech Model", selection: $transcriptionLabController.selectedSpeechModelID) {
+                        ForEach(ModelManager.availableModels) { model in
+                            Text(model.pickerLabel).tag(model.name)
                         }
-
-                        Button {
-                            Task {
-                                await transcriptionLabController.rerunTranscription()
-                            }
-                        } label: {
-                            HStack {
-                                if transcriptionLabController.isRunningTranscription {
-                                    ProgressView()
-                                        .controlSize(.small)
-                                } else {
-                                    Image(systemName: "arrow.trianglehead.clockwise")
-                                }
-                                Text(transcriptionLabController.isRunningTranscription ? "Rerunning..." : "Rerun Transcription")
-                            }
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .disabled(transcriptionLabController.runningStage != nil)
                     }
+                    .labelsHidden()
+                    .frame(maxWidth: 300, alignment: .leading)
+
+                    Button {
+                        Task {
+                            await transcriptionLabController.rerunTranscription()
+                        }
+                    } label: {
+                        HStack {
+                            if transcriptionLabController.isRunningTranscription {
+                                ProgressView()
+                                    .controlSize(.small)
+                            } else {
+                                Image(systemName: "arrow.trianglehead.clockwise")
+                            }
+                            Text(transcriptionLabController.isRunningTranscription ? "Running..." : "Run transcription")
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(transcriptionLabController.runningStage != nil)
                 }
+
+                ReadOnlyTextPane(
+                    text: transcriptionLabController.displayedExperimentRawTranscription,
+                    minimumHeight: 72,
+                    maximumHeight: 180,
+                    monospaced: false
+                )
             }
 
             SettingsCard("Cleanup") {
