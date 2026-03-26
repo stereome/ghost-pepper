@@ -4,15 +4,15 @@
     <title>Ghost Pepper</title>
     <link>https://github.com/matthartman/ghost-pepper</link>
     <item>
-      <title>Version 1.5</title>
-      <sparkle:version>6</sparkle:version>
-      <sparkle:shortVersionString>1.5</sparkle:shortVersionString>
+      <title>Version 1.6</title>
+      <sparkle:version>7</sparkle:version>
+      <sparkle:shortVersionString>1.6</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
       <enclosure
-        url="https://github.com/matthartman/ghost-pepper/releases/download/v1.5.0/GhostPepper.dmg"
+        url="https://github.com/matthartman/ghost-pepper/releases/download/v1.6.0/GhostPepper.dmg"
         type="application/octet-stream"
-        sparkle:edSignature="2iYXZW5twsZIoDwIOxij0oFy3jTcwhMK/eCOy9yTm/cNUEXe326yuz7B2Kpsv8QZsEgSykLdYvCdILqZuAuYDQ=="
-        length="15235062"
+        sparkle:edSignature="BBis9fWtAah0roWP1VM7ZmrcdHySNfk1xpqnLg0k3QFC8UJVch2zfijZ6T9O8ah8i312x9Xx4az9eUTcMEUdCQ=="
+        length="17596555"
       />
     </item>
   </channel>
