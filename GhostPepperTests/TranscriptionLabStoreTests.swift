@@ -121,6 +121,58 @@ final class TranscriptionLabStoreTests: XCTestCase {
         )
     }
 
+    func testStoreDropsUnreadableEntryIndexWithoutPreservingOldEntries() throws {
+        let fixture = makeFixture()
+        let store = TranscriptionLabStore(
+            directoryURL: fixture.directoryURL,
+            maxEntries: 50
+        )
+        let legacyIndexURL = fixture.directoryURL.appendingPathComponent("transcription-lab-index.json")
+
+        try Data("""
+        [
+          {
+            "id": "00000000-0000-0000-0000-000000000041",
+            "createdAt": 123,
+            "audioFileName": "legacy.wav",
+            "audioDuration": 1.0,
+            "rawTranscription": "legacy",
+            "correctedTranscription": "legacy",
+            "speechModelID": "fluid_parakeet-v3",
+            "cleanupModelName": "Qwen 3.5 2B (fast cleanup)",
+            "cleanupUsedFallback": false
+          }
+        ]
+        """.utf8).write(to: legacyIndexURL)
+
+        XCTAssertEqual(try store.loadEntries(), [])
+        XCTAssertFalse(FileManager.default.fileExists(atPath: legacyIndexURL.path))
+    }
+
+    func testInsertRecoversFromUnreadableLegacyArchiveState() throws {
+        let fixture = makeFixture()
+        let store = TranscriptionLabStore(
+            directoryURL: fixture.directoryURL,
+            maxEntries: 50
+        )
+        let indexURL = fixture.directoryURL.appendingPathComponent("transcription-lab-index.json")
+        let timingsURL = fixture.directoryURL.appendingPathComponent("transcription-lab-timings.json")
+
+        try Data("not-json".utf8).write(to: indexURL)
+        try Data("still-not-json".utf8).write(to: timingsURL)
+
+        let entry = makeEntry(
+            id: UUID(uuidString: "00000000-0000-0000-0000-000000000042")!,
+            createdAt: Date(timeIntervalSince1970: 999),
+            audioFileName: "recovered.wav"
+        )
+
+        try store.insert(entry, audioData: Data([0x01, 0x02]), stageTimings: makeStageTimings())
+
+        XCTAssertEqual(try store.loadEntries(), [entry])
+        XCTAssertEqual(try store.loadStageTimings()[entry.id], makeStageTimings())
+    }
+
     func testTranscriptionLabEntryRoundTripsDiarizationSummary() throws {
         let entry = makeEntry(
             id: UUID(uuidString: "00000000-0000-0000-0000-000000000031")!,
