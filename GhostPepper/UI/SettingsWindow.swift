@@ -131,6 +131,14 @@ private enum SettingsSection: String, CaseIterable, Identifiable {
     }
 }
 
+struct RecordingSpeakerFilteringToggleState {
+    let isEnabled: Bool
+
+    init(speechModel: SpeechModelDescriptor?) {
+        isEnabled = speechModel?.supportsSpeakerFiltering ?? false
+    }
+}
+
 struct SettingsView: View {
     @ObservedObject var appState: AppState
     @State private var inputDevices: [AudioInputDevice] = []
@@ -192,6 +200,12 @@ struct SettingsView: View {
 
     private var hasMissingModels: Bool {
         RuntimeModelInventory.hasMissingModels(rows: modelRows)
+    }
+
+    private var speakerFilteringToggleState: RecordingSpeakerFilteringToggleState {
+        RecordingSpeakerFilteringToggleState(
+            speechModel: SpeechModelCatalog.model(named: appState.speechModel)
+        )
     }
 
     private var modelsAreDownloading: Bool {
@@ -431,6 +445,15 @@ struct SettingsView: View {
                             set: { appState.playSounds = $0 }
                         )
                     )
+
+                    Toggle(
+                        "Ignore other speakers",
+                        isOn: Binding(
+                            get: { appState.ignoreOtherSpeakers },
+                            set: { appState.ignoreOtherSpeakers = $0 }
+                        )
+                    )
+                    .disabled(!speakerFilteringToggleState.isEnabled)
                 }
             }
 

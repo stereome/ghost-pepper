@@ -245,6 +245,24 @@ final class GhostPepperTests: XCTestCase {
         )
     }
 
+    func testAppStatePersistsIgnoreOtherSpeakersPreference() throws {
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: #function))
+        defaults.removePersistentDomain(forName: #function)
+        defaults.set(true, forKey: "ignoreOtherSpeakers")
+
+        let appState = AppState(
+            hotkeyMonitor: FakeHotkeyMonitor(),
+            chordBindingStore: ChordBindingStore(defaults: defaults),
+            cleanupSettingsDefaults: defaults
+        )
+
+        XCTAssertTrue(appState.ignoreOtherSpeakers)
+
+        appState.ignoreOtherSpeakers = false
+
+        XCTAssertEqual(defaults.object(forKey: "ignoreOtherSpeakers") as? Bool, false)
+    }
+
     func testAppStateDefaultsPostPasteLearningToEnabled() throws {
         let defaults = try XCTUnwrap(UserDefaults(suiteName: #function))
         defaults.removePersistentDomain(forName: #function)
@@ -257,6 +275,18 @@ final class GhostPepperTests: XCTestCase {
 
         XCTAssertTrue(appState.postPasteLearningEnabled)
         XCTAssertTrue(appState.postPasteLearningCoordinator.learningEnabled)
+    }
+
+    func testRecordingSettingsDisablesIgnoreOtherSpeakersForWhisperModels() {
+        let parakeetState = RecordingSpeakerFilteringToggleState(
+            speechModel: SpeechModelCatalog.parakeetV3
+        )
+        let whisperState = RecordingSpeakerFilteringToggleState(
+            speechModel: SpeechModelCatalog.whisperSmallEnglish
+        )
+
+        XCTAssertTrue(parakeetState.isEnabled)
+        XCTAssertFalse(whisperState.isEnabled)
     }
 
     func testAppStateUpdatePostPasteLearningPersistsAndUpdatesCoordinator() throws {

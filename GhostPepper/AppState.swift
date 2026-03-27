@@ -62,6 +62,14 @@ class AppState: ObservableObject {
             postPasteLearningCoordinator.learningEnabled = postPasteLearningEnabled
         }
     }
+    @Published var ignoreOtherSpeakers: Bool {
+        didSet {
+            cleanupSettingsDefaults.set(
+                ignoreOtherSpeakers,
+                forKey: Self.ignoreOtherSpeakersDefaultsKey
+            )
+        }
+    }
 
     let modelManager = ModelManager()
     let audioRecorder: AudioRecorder
@@ -108,6 +116,7 @@ class AppState: ObservableObject {
     private static let cleanupBackendDefaultsKey = "cleanupBackend"
     private static let frontmostWindowContextEnabledDefaultsKey = "frontmostWindowContextEnabled"
     private static let postPasteLearningEnabledDefaultsKey = "postPasteLearningEnabled"
+    private static let ignoreOtherSpeakersDefaultsKey = "ignoreOtherSpeakers"
     private static let playSoundsDefaultsKey = "playSounds"
     private static let emptyTranscriptionCancelThresholdSampleCount = 80_000
 
@@ -176,9 +185,18 @@ class AppState: ObservableObject {
                 forKey: Self.postPasteLearningEnabledDefaultsKey
             )
         }
+        let storedIgnoreOtherSpeakers: Bool
+        if cleanupSettingsDefaults.object(forKey: Self.ignoreOtherSpeakersDefaultsKey) == nil {
+            storedIgnoreOtherSpeakers = false
+        } else {
+            storedIgnoreOtherSpeakers = cleanupSettingsDefaults.bool(
+                forKey: Self.ignoreOtherSpeakersDefaultsKey
+            )
+        }
         self.cleanupBackend = storedCleanupBackend
         self.frontmostWindowContextEnabled = storedFrontmostWindowContextEnabled
         self.postPasteLearningEnabled = storedPostPasteLearningEnabled
+        self.ignoreOtherSpeakers = storedIgnoreOtherSpeakers
         if cleanupSettingsDefaults.object(forKey: Self.playSoundsDefaultsKey) == nil {
             self.playSounds = true
         } else {
@@ -214,6 +232,10 @@ class AppState: ObservableObject {
         cleanupSettingsDefaults.set(
             storedPostPasteLearningEnabled,
             forKey: Self.postPasteLearningEnabledDefaultsKey
+        )
+        cleanupSettingsDefaults.set(
+            storedIgnoreOtherSpeakers,
+            forKey: Self.ignoreOtherSpeakersDefaultsKey
         )
         cleanupSettingsDefaults.set(
             playSounds,
