@@ -3,6 +3,7 @@ import AVFoundation
 final class AudioRecorder {
     var onRecordingStarted: (() -> Void)?
     var onRecordingStopped: (() -> Void)?
+    var onConvertedAudioChunk: (([Float]) -> Void)?
 
     private let engine = AVAudioEngine()
     private let bufferLock = NSLock()
@@ -142,7 +143,7 @@ final class AudioRecorder {
 
     // MARK: - Private
 
-    private func convert(buffer: AVAudioPCMBuffer, using converter: AVAudioConverter) {
+    func convert(buffer: AVAudioPCMBuffer, using converter: AVAudioConverter) {
         let frameCapacity = AVAudioFrameCount(
             Double(buffer.frameLength) * (targetFormat.sampleRate / buffer.format.sampleRate)
         ) + 1 // +1 to avoid rounding down to zero
@@ -178,6 +179,8 @@ final class AudioRecorder {
         bufferLock.lock()
         audioBuffer.append(contentsOf: frames)
         bufferLock.unlock()
+
+        onConvertedAudioChunk?(frames)
     }
 }
 

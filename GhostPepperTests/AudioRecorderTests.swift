@@ -1,3 +1,4 @@
+import AVFoundation
 import XCTest
 @testable import GhostPepper
 
@@ -37,5 +38,61 @@ final class AudioRecorderTests: XCTestCase {
         for (decodedSample, expectedSample) in zip(decoded, samples) {
             XCTAssertEqual(decodedSample, expectedSample, accuracy: 0.0001)
         }
+    }
+
+    func testConvertedSamplesAreDeliveredToChunkCallback() throws {
+        let recorder = AudioRecorder()
+        var deliveredChunks: [[Float]] = []
+        recorder.onConvertedAudioChunk = { chunk in
+            deliveredChunks.append(chunk)
+        }
+
+        let inputFormat = AVAudioFormat(
+            commonFormat: .pcmFormatFloat32,
+            sampleRate: 16_000,
+            channels: 1,
+            interleaved: false
+        )!
+        let converter = AVAudioConverter(from: inputFormat, to: inputFormat)!
+
+        recorder.convert(buffer: makePCMBuffer(samples: [0.1, 0.2], format: inputFormat), using: converter)
+        recorder.convert(buffer: makePCMBuffer(samples: [0.3, 0.4], format: inputFormat), using: converter)
+
+        XCTAssertEqual(deliveredChunks, [[0.1, 0.2], [0.3, 0.4]])
+    }
+
+    func testChunkDeliveryStillAccumulatesFinalAudioBuffer() throws {
+        let recorder = AudioRecorder()
+        var deliveredSamples: [Float] = []
+        recorder.onConvertedAudioChunk = { chunk in
+            deliveredSamples.append(contentsOf: chunk)
+        }
+
+        let inputFormat = AVAudioFormat(
+            commonFormat: .pcmFormatFloat32,
+            sampleRate: 16_000,
+            channels: 1,
+            interleaved: false
+        )!
+        let converter = AVAudioConverter(from: inputFormat, to: inputFormat)!
+
+        recorder.convert(buffer: makePCMBuffer(samples: [0.1, 0.2], format: inputFormat), using: converter)
+        recorder.convert(buffer: makePCMBuffer(samples: [0.3, 0.4], format: inputFormat), using: converter)
+
+        XCTAssertEqual(deliveredSamples, [0.1, 0.2, 0.3, 0.4])
+        XCTAssertEqual(recorder.audioBuffer, [0.1, 0.2, 0.3, 0.4])
+    }
+
+    private func makePCMBuffer(samples: [Float], format: AVAudioFormat) -> AVAudioPCMBuffer {
+        let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(samples.count))!
+        buffer.frameLength = AVAudioFrameCount(samples.count)
+
+        let channelData = buffer.floatChannelData!.pointee
+
+        for (index, sample) in samples.enumerated() {
+            channelData[index] = sample
+        }
+
+        return buffer
     }
 }
