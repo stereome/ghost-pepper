@@ -681,6 +681,7 @@ class AppState: ObservableObject {
         if shouldPaste {
             let pasteResult = textPaster.paste(text: finalText)
             if pasteResult == .copiedToClipboard {
+                OrphanTranscriptionLogger.shared.log(text: finalText)
                 showClipboardFallbackMessage()
             }
         }
